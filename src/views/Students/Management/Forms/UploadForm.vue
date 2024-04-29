@@ -223,14 +223,14 @@ export default {
 <style scoped>
 .content-wrapper {
   padding: 20px;
-  margin-top: 60px;
+
   overflow-y: auto;
   flex: 1;
 }
 
 .add-form {
   max-width: 700px;
-  margin-left: 23%;
+
   margin-right: auto;
 }
 
@@ -287,7 +287,7 @@ export default {
 #cusTable {
   margin-top: 20px;
   max-width: 700px;
-  margin-left: 23%;
+
   margin-right: auto;
 }
 

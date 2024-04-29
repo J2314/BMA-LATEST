@@ -110,14 +110,18 @@ export default {
       }
     },
     fetchDepartments() {
-  axios.get('retrieve') // Use the correct endpoint path here
-    .then(response => {
-      this.departments = response.data;
-    })
-    .catch(error => {
-      console.error('Error fetching departments:', error);
-    });
-}
+      axios.get('retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+        .then(response => {
+          this.departments = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching departments:', error);
+        });
+    }
 
   },
   mounted() {

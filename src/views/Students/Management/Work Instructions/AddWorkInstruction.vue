@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     openPdf(instrId) {
-      axios.get(`http://127.0.0.1:8000/api/retrieve-instructions/${instrId}`)
+      axios.get(`retrieve-instructions/${instrId}`)
         .then(response => {
           const fileContent = response.data.instruction.file_path;
           const pdfViewer = this.$refs.pdfViewer;

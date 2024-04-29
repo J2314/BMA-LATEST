@@ -24,13 +24,14 @@
                 <label for="departmentId" class="form-label">Departments:</label>
                 <select id="departmentId" class="form-control" v-model="department_id">
                   <option value="">Select Department</option>
-                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
+              department.name
+            }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
-                <input class="form-control smaller-input" id="formFileLg" type="file" @change="fileSelected"
-                  ref="file">
+                <input class="form-control smaller-input" id="formFileLg" type="file" @change="fileSelected" ref="file">
               </div>
               <div class="d-flex">
                 <button type="submit" class="btn btn-primary">Upload</button>
@@ -54,7 +55,8 @@
                   <td>{{ policy.document_type }}</td>
                   <td>{{ policy.document_name }}</td>
                   <td>{{ policy.file_path }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary" @click="openPdf(policy.id)">View</button></td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary"
+                      @click="openPdf(policy.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
@@ -84,7 +86,7 @@ export default {
       department_id: '',
       departments: [],
       policies: [],
-      formErrors: {} // New state to hold form validation errors
+      formErrors: {}
     };
   },
   computed: {
@@ -99,14 +101,27 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        const fileContent = response.data.policy.file_path;
-        const pdfViewer = this.$refs.pdfViewer;
-        pdfViewer.src = fileContent;
-      })
-      .catch(error => {
-        this.handleApiError(error);
-      });
+        .then(response => {
+          const fileContent = response.data.policy.file_path;
+          console.log(fileContent)
+          const pdfViewer = this.$refs.pdfViewer;
+          pdfViewer.src = fileContent;
+
+          axios.post('increment-view-count', {
+            formFileId: fileId,
+            user_id: this.userId
+          })
+            .then(response => {
+              console.log(response.data.message);
+              console.log(formFileId);
+            })
+            .catch(error => {
+              console.error('Error recording view:', error);
+            });
+        })
+        .catch(error => {
+          console.error('Error fetching file content:', error);
+        });
     },
     submitForm() {
       if (!this.document_type || !this.document_name || !this.$refs.file.files[0]) {
@@ -130,16 +145,16 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        if (response.status >= 200 && response.status < 300) {
-          this.handleSuccess();
-        } else {
-          this.handleApiError(response.error);
-        }
-      })
-      .catch(error => {
-        this.handleApiError(error);
-      });
+        .then(response => {
+          if (response.status >= 200 && response.status < 300) {
+            this.handleSuccess();
+          } else {
+            this.handleApiError(response.error);
+          }
+        })
+        .catch(error => {
+          console.error('API Error:', error);
+        });
     },
     fetchPolicies() {
       axios.get('retrieve-policies', {
@@ -147,15 +162,15 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        this.policies = response.data;
-      })
-      .catch(error => {
-        this.handleApiError(error);
-      });
+        .then(response => {
+          this.policies = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching policies:', error);
+        });
     },
     fileSelected(event) {
-      const file = event.target.files[0]; 
+      const file = event.target.files[0];
       if (file) {
         const fileList = new DataTransfer();
         fileList.items.add(file);
@@ -168,13 +183,13 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        this.fetchDepartments()
-        this.departments = response.data;
-      })
-      .catch(error => {
-        this.handleApiError(error);
-      });
+        .then(response => {
+          this.departments = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching departments:', error);
+          // Handle the error as per your requirements, e.g., show an error message to the user
+        });
     },
     handleSuccess() {
       alert('File uploaded successfully.');
@@ -185,10 +200,6 @@ export default {
       this.fetchPolicies();
       this.formErrors = {}; // Clear form errors
     },
-    handleApiError(error) {
-      console.error('API Error:', error);
-      // Display error message to the user, e.g., this.errorMessage = 'An error occurred. Please try again later.';
-    }
   },
   mounted() {
     this.fetchPolicies();
