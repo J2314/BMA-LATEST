@@ -17,11 +17,13 @@
               </div>
               <div class="form-group">
                 <label for="documentName" class="form-label">Document Name:</label>
-                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name" placeholder="Enter document name">
+                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name"
+                  placeholder="Enter document name">
               </div>
               <div class="form-group">
                 <label for="employee" class="form-label">Employee:</label>
-                <input type="text" id="employee" class="form-control smaller-input" v-model="employee" placeholder="Enter employee name">
+                <input type="text" id="employee" class="form-control smaller-input" v-model="employee"
+                  placeholder="Enter employee name">
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
@@ -51,7 +53,8 @@
                   <td>{{ instruction.document_name }}</td>
                   <td>{{ instruction.employee }}</td>
                   <td>{{ instruction.file_path }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary" @click="openPdf(instruction.id)">View</button></td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary"
+                      @click="openPdf(instruction.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
@@ -69,6 +72,8 @@
 
 <script>
 import axios from 'axios';
+import { mapGetters } from 'vuex';
+import { GET_USER_TOKEN } from '@/store/storeConstants.js';
 
 export default {
   name: 'AddWorkInstructionPage',
@@ -78,15 +83,25 @@ export default {
       document_name: '',
       employee: '',
       instructions: [],
+      file: null, 
     };
   },
+  computed: {
+    ...mapGetters('auth', {
+      token: GET_USER_TOKEN
+    })
+  },
   methods: {
-    openPdf(instrId) {
-      axios.get(`retrieve-instructions/${instrId}`)
+    openPdf(workId) {
+      axios.get(`retrieve-workins/${workId}`, {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
         .then(response => {
-          const fileContent = response.data.instruction.file_path;
+          const fileContent = response.data.work.file_path;
           const pdfViewer = this.$refs.pdfViewer;
-
+          console.log(response)
           pdfViewer.src = fileContent;
         })
         .catch(error => {
@@ -94,20 +109,21 @@ export default {
         });
     },
     submitForm() {
-      if (!this.document_type || !this.document_name || !this.employee || !this.$refs.file.files[0]) {
+      if (!this.document_type || !this.document_name || !this.employee || !this.file) {
         alert('Please fill out all fields and select a file.');
         return;
       }
 
       let formData = new FormData();
-      formData.append('file', this.$refs.file.files[0]);
+      formData.append('file', this.file);
       formData.append('document_type', this.document_type);
       formData.append('document_name', this.document_name);
-      formData.append('employee', this.employee);
+      formData.append('employee_name', this.employee); 
 
-      axios.post('http://127.0.0.1:8000/api/upload-instruction', formData, {
+      axios.post('upload-work', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data', 
+          Authorization: 'Bearer ' + this.token
         }
       })
         .then(response => {
@@ -116,7 +132,7 @@ export default {
             this.document_type = '';
             this.document_name = '';
             this.employee = '';
-            this.$refs.file.value = null;
+            this.file = null;
             this.fetchInstructions();
           } else {
             alert('Error uploading file.');
@@ -128,9 +144,14 @@ export default {
         });
     },
     fetchInstructions() {
-      axios.get('http://127.0.0.1:8000/api/retrieve-instructions')
+      axios.get('retrieve-instructions', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
         .then(response => {
           this.instructions = response.data;
+          console.log(response)
         })
         .catch(error => {
           console.error('Error fetching instructions:', error);
@@ -139,7 +160,7 @@ export default {
     fileSelected(event) {
       const files = event.target.files;
       if (files.length > 0) {
-        this.form.file = files[0];
+        this.file = files[0]; 
       }
     },
   },
@@ -148,6 +169,7 @@ export default {
   }
 }
 </script>
+
 
 <style scoped>
 .content-wrapper {
