@@ -107,18 +107,19 @@ export default {
           const pdfViewer = this.$refs.pdfViewer;
           pdfViewer.src = fileContent;
 
-          axios.post('increment-view-count', {
-            formFileId: fileId,
-            user_id: this.userId
-          })
-            .then(response => {
-              console.log(response.data.message);
-              console.log(formFileId);
-            })
-            .catch(error => {
-              console.error('Error recording view:', error);
-            });
+          // axios.post('increment-view-count', {
+          //   formFileId: polId, 
+          //   user_id: this.userId
+          // })
+          //   .then(response => {
+          //     console.log(response.data.message);
+          //     console.log(polId);
+          //   })
+          //   .catch(error => {
+          //     console.error('Error recording view:', error);
+          //   });
         })
+        
         .catch(error => {
           console.error('Error fetching file content:', error);
         });
