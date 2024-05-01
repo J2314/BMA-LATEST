@@ -99,6 +99,7 @@ export default {
         }
       })
       .then(response => {
+        console.log(response)
         const fileContent = response.data.procedure.file_path;
         const pdfViewer = this.$refs.pdfViewer;
 

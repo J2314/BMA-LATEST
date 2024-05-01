@@ -8,10 +8,11 @@
               <h1 class="form-title">Add Records</h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Record Type:</label>
-                <select id="documentType" class="form-control" v-model="documentType">
+                <select id="documentType" class="form-control" v-model="recordType">
                   <option value="" disabled selected>Select Record Type</option>
                   <option value="Document Control Procedure">Document Control Procedure</option>
-                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action (CAPA) Procedure</option>
+                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action
+                    (CAPA) Procedure</option>
                   <option value="Internal Audit Procedure">Internal Audit Procedure</option>
                   <option value="Management Review Procedure">Management Review Procedure</option>
                   <option value="Risk Management Review Procedure">Risk Management Review Procedure</option>
@@ -19,11 +20,13 @@
               </div>
               <div class="form-group">
                 <label for="departmentalProcedure" class="form-label">Record Name:</label>
-                <input type="text" id="departmentalProcedure" class="form-control smaller-input" v-model="departmentalProcedure" placeholder="Enter record name">
+                <input type="text" id="departmentalProcedure" class="form-control smaller-input" v-model="recordName"
+                  placeholder="Enter record name">
               </div>
               <div class="form-group">
                 <label for="documentName" class="form-label">Document Name:</label>
-                <input type="text" id="documentName" class="form-control smaller-input" v-model="documentName" placeholder="Enter document name">
+                <input type="text" id="documentName" class="form-control smaller-input" v-model="documentName"
+                  placeholder="Enter document name">
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
@@ -46,12 +49,13 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(policy, index) in policies" :key="index">
+                <tr v-for="(record, index) in records" :key="index">
                   <td>{{ index + 1 }}</td>
-                  <td>{{ policy.documentType }}</td>
-                  <td>{{ policy.documentName }}</td>
-                  <td>{{ policy.filePath }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary smaller-button" @click="openPdf(policy.id)">View</button></td>
+                  <td>{{ record.record_type }}</td>
+                  <td>{{ record.document_name }}</td>
+                  <td>{{ record.file_path }}</td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary smaller-button"
+                      @click="openPdf(record.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
@@ -76,11 +80,12 @@ export default {
   name: 'AddRecordsPage',
   data() {
     return {
-      documentType: '',
-      departmentalProcedure: '',
+      recordType: '',
+      recordName: '',
       documentName: '',
       selectedFile: null,
-      policies: [],
+      records: [],
+      file: null
     };
   },
   computed: {
@@ -89,14 +94,15 @@ export default {
     }),
   },
   methods: {
-    openPdf(polId) {
-      axios.get(`retrieve-policies/${polId}`, {
+    openPdf(recId) {
+      axios.get(`retrieve-records/${recId}`, {
         headers: {
           Authorization: 'Bearer ' + this.token,
         },
       })
         .then(response => {
-          const fileContent = response.data.policy.filePath;
+          console.log(response)
+          const fileContent = response.data.record.file_path;
           this.$refs.pdfViewer.src = fileContent;
         })
         .catch(error => {
@@ -105,23 +111,18 @@ export default {
         });
     },
     submitForm() {
-      console.log('Document Type:', this.documentType);
-      console.log('Departmental Procedure:', this.departmentalProcedure);
-      console.log('Document Name:', this.documentName);
-      console.log('Selected File:', this.selectedFile);
-
-      if (!this.documentType || !this.departmentalProcedure || !this.documentName || !this.selectedFile) {
+      if (!this.recordType || !this.recordName || !this.documentName || !this.selectedFile) {
         alert('Please fill out all fields and select a file.');
         return;
       }
 
       const formData = new FormData();
       formData.append('file', this.selectedFile);
-      formData.append('document_type', this.documentType);
-      formData.append('departmental_procedure', this.departmentalProcedure);
+      formData.append('record_type', this.recordType);
+      formData.append('record_name', this.recordName);
       formData.append('document_name', this.documentName);
 
-      axios.post('upload-policy', formData, {
+      axios.post('upload-record', formData, {
         headers: {
           Authorization: 'Bearer ' + this.token,
           'Content-Type': 'multipart/form-data',
@@ -131,7 +132,7 @@ export default {
           if (response.status === 200) {
             alert('File uploaded successfully.');
             this.resetForm();
-            this.fetchPolicies();
+            this.fetchRecords();
           } else {
             alert('Error uploading file.');
           }
@@ -141,18 +142,19 @@ export default {
           alert('Error uploading file.');
         });
     },
-    fetchPolicies() {
-      axios.get('retrieve-policies', {
+    fetchRecords() {
+      axios.get('retrieve-record', {
         headers: {
           Authorization: 'Bearer ' + this.token,
         },
       })
         .then(response => {
-          this.policies = response.data;
+          //console.log(response.data); 
+          this.records = response.data; 
         })
         .catch(error => {
-          console.error('Error fetching policies:', error);
-          alert('Error fetching policies.');
+          console.error('Error fetching records:', error);
+          alert('Error fetching records.');
         });
     },
     fileSelected(event) {
@@ -162,14 +164,14 @@ export default {
       }
     },
     resetForm() {
-      this.documentType = '';
-      this.departmentalProcedure = '';
+      this.recordType = '';
+      this.recordName = '';
       this.documentName = '';
       this.selectedFile = null;
     },
   },
   mounted() {
-    this.fetchPolicies();
+    this.fetchRecords();
   },
 };
 </script>
@@ -181,7 +183,7 @@ export default {
 }
 
 .add-form {
-  max-width: 100%; 
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -193,19 +195,19 @@ export default {
 
 .form-control {
   width: 100%;
-  padding: 8px; 
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
-  margin-bottom: 8px; 
+  margin-bottom: 8px;
 }
 
 .smaller-input {
-  padding: 5px; 
+  padding: 5px;
 }
 
 .btn-primary {
-  margin-top: 10px; 
+  margin-top: 10px;
   background-color: #007bff;
   color: #fff;
   border: none;
@@ -213,7 +215,7 @@ export default {
   padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 14px; 
+  font-size: 14px;
 }
 
 .btn-primary:hover {
@@ -224,18 +226,18 @@ export default {
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
-  overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .table-hover th,
 .table-hover td {
-  padding: 8px; 
+  padding: 8px;
 }
 
 .pdf-viewer-container {
-  margin-top: 10px; 
-  width: 100%; 
-  height: 600px; 
+  margin-top: 10px;
+  width: 100%;
+  height: 600px;
   border: 1px solid #ccc;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -246,4 +248,3 @@ export default {
   border: none;
 }
 </style>
-
