@@ -54,7 +54,7 @@ export default {
         ];
 
         const setting = [
-            { name: 'Profile', url: '/admin/AddProcedures' },
+            { name: 'Profile', url: '/staff/Profile' },
         ];
 
         const items = [

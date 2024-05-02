@@ -11,7 +11,8 @@
                 <select id="documentType" class="form-control" v-model="document_type">
                   <option value="" disabled selected>Select Procedure Type</option>
                   <option value="Document Control Procedure">Document Control Procedure</option>
-                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action (CAPA) Procedure</option>
+                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action
+                    (CAPA) Procedure</option>
                   <option value="Internal Audit Procedure">Internal Audit Procedure</option>
                   <option value="Management Review Procedure">Management Review Procedure</option>
                   <option value="Risk Management Review Procedure">Risk Management Review Procedure</option>
@@ -21,12 +22,14 @@
                 <label for="departmentId" class="form-label">Department:</label>
                 <select id="departmentId" class="form-control" v-model="department_id">
                   <option value="">Select Department</option>
-                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
+              department.name }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="documentName" class="form-label">Document Name:</label>
-                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name" placeholder="Enter document name">
+                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name"
+                  placeholder="Enter document name">
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
@@ -54,7 +57,8 @@
                   <td>{{ procedure.document_type }}</td>
                   <td>{{ procedure.document_name }}</td>
                   <td>{{ procedure.file_path }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary" @click="openPdf(procedure.id)">View</button></td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary"
+                      @click="openPdf(procedure.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
@@ -98,16 +102,16 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        console.log(response)
-        const fileContent = response.data.procedure.file_path;
-        const pdfViewer = this.$refs.pdfViewer;
+        .then(response => {
+          console.log(response)
+          const fileContent = response.data.procedure.file_path;
+          const pdfViewer = this.$refs.pdfViewer;
 
-        pdfViewer.src = fileContent;
-      })
-      .catch(error => {
-        console.error('Error fetching file content:', error);
-      });
+          pdfViewer.src = fileContent;
+        })
+        .catch(error => {
+          console.error('Error fetching file content:', error);
+        });
     },
     submitForm() {
       if (!this.document_type || !this.department_id || !this.document_name || !this.$refs.file.files[0]) {
@@ -127,22 +131,22 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        if (response.status === 200) {
-          alert('File uploaded successfully.');
-          this.document_type = '';
-          this.department_id = '';
-          this.document_name = '';
-          this.$refs.file.value = null;
-          this.fetchProcedures();
-        } else {
+        .then(response => {
+          if (response.status === 200) {
+            alert('File uploaded successfully.');
+            this.document_type = '';
+            this.department_id = '';
+            this.document_name = '';
+            this.$refs.file.value = null;
+            this.fetchProcedures();
+          } else {
+            alert('Error uploading file.');
+          }
+        })
+        .catch(error => {
+          console.error('Error uploading file:', error);
           alert('Error uploading file.');
-        }
-      })
-      .catch(error => {
-        console.error('Error uploading file:', error);
-        alert('Error uploading file.');
-      });
+        });
     },
     fetchProcedures() {
       axios.get('retrieve-procedures', {
@@ -150,12 +154,12 @@ export default {
           Authorization: 'Bearer ' + this.token
         }
       })
-      .then(response => {
-        this.procedures = response.data;
-      })
-      .catch(error => {
-        console.error('Error fetching procedures:', error);
-      });
+        .then(response => {
+          this.procedures = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching procedures:', error);
+        });
     },
     fileSelected(event) {
       const files = event.target.files;
@@ -164,24 +168,24 @@ export default {
       }
     },
     fetchDepartments() {
-  axios.get('retrieve', {
-    headers: {
-      Authorization: 'Bearer ' + this.token
+      axios.get('retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+        .then(response => {
+          this.departments = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching departments:', error);
+        });
     }
-  })
-  .then(response => {
-    this.departments = response.data;
-  })
-  .catch(error => {
-    console.error('Error fetching departments:', error);
-  });
-}
 
   },
   mounted() {
-  this.fetchProcedures();
-  this.fetchDepartments(); // Call fetchDepartments when the component is mounted
-}
+    this.fetchProcedures();
+    this.fetchDepartments(); // Call fetchDepartments when the component is mounted
+  }
 
 }
 </script>
@@ -195,7 +199,7 @@ export default {
 }
 
 .add-form {
-  max-width: 100%; 
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -207,19 +211,19 @@ export default {
 
 .form-control {
   width: 100%;
-  padding: 8px; 
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
-  margin-bottom: 8px; 
+  margin-bottom: 8px;
 }
 
 .smaller-input {
-  padding: 5px; 
+  padding: 5px;
 }
 
 .btn-primary {
-  margin-top: 10px; 
+  margin-top: 10px;
   background-color: #007bff;
   color: #fff;
   border: none;
@@ -227,7 +231,7 @@ export default {
   padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.3s;
-  font-size: 14px; 
+  font-size: 14px;
 }
 
 .btn-primary:hover {
@@ -238,18 +242,18 @@ export default {
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
-  overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .table-hover th,
 .table-hover td {
-  padding: 8px; 
+  padding: 8px;
 }
 
 .pdf-viewer-container {
-  margin-top: 10px; 
-  width: 100%; 
-  height: 600px; 
+  margin-top: 10px;
+  width: 100%;
+  height: 600px;
   border: 1px solid #ccc;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
