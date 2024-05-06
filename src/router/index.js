@@ -83,8 +83,27 @@ function adminUserMiddleware(to, from, next) {
   // Regular user middleware logic
   // console.log('Student user middleware')
   if (to.meta.user !== 'admin') {
-    next('/admin/dashboard')
-  } else {
+    next('/admin/dashboard')// router.beforeEach((to, from, next) => {
+      // //   const isAuth = store.getters[`auth/${IS_USER_AUTHENTICATE_GETTER}`]
+      // //   const isAuthType = store.getters[`auth/${GET_USER_TYPE}`]
+      // //   console.log(isAuth)
+      // //   console.log(isAuthType)
+      // //   document.title = `${to.meta.name} - Baliwag Maritime Academy, Inc.`
+      // //   if (isAuth) {
+      // //     if (isAuthType === 'admin') {
+      // //       adminUserMiddleware(to, from, next)
+      // //     } else if (isAuthType === 'staff') {
+      // //       staffUserMiddleware(to, from, next)
+      // //     }
+      // //   } else {
+      // //     if (to.meta.user !== 'guest') {
+      // //       next('/')
+      // //     } else {
+      // //       next()
+      // //     }
+      // //   }
+      // // })
+} else {
     next()
   }
 }
@@ -94,7 +113,7 @@ function staffUserMiddleware(to, from, next) {
   // console.log('Applicant user middleware')
   if (to.meta.user !== 'staff') {
     next('/staff/dashboard')
-  } else {
+  } else {  
     next()
   }
 }

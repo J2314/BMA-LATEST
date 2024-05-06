@@ -8,21 +8,20 @@
             <tr>
               <td>
                 <label for="userName" class="form-label">Name</label>
-                <input type="text" id="userName" class="form-control" v-model="users.userName" placeholder="Enter name">
+                <input type="text" id="userName" class="form-control" v-model="userName" placeholder="Enter name">
               </td>
               <td>
                 <label for="userEmail" class="form-label">Email</label>
-                <input type="email" id="userEmail" class="form-control" v-model="users.userEmail"
-                  placeholder="Enter email">
+                <input type="email" id="userEmail" class="form-control" v-model="userEmail" placeholder="Enter email">
               </td>
               <td>
                 <label for="userPassword" class="form-label">Password</label>
-                <input type="password" id="userPassword" class="form-control" v-model="users.userPassword"
+                <input type="password" id="userPassword" class="form-control" v-model="userPassword"
                   placeholder="Enter password">
               </td>
               <td>
                 <label for="userDepartment" class="form-label">Department</label>
-                <select id="userDepartment" class="form-control" v-model="users.userDepartment">
+                <select id="userDepartment" class="form-control" v-model="userDepartment">
                   <option value="">Select department</option>
                   <option v-for="department in departments" :key="department.id" :value="department.id">{{
         department.name }}</option>
@@ -61,11 +60,13 @@
             <td>{{ user.id }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.department }}</td>
+            <td>{{ getDepartmentName(user.department_id) }}</td>
             <td>{{ user.role }}</td>
             <td>
-              <button @click="editUser(user.id)" class="btn btn-info">Edit</button>
-              <button @click="deleteUser(user.id)" class="btn btn-danger">Remove</button>
+              <router-link class="btn btn-info edit-button" :to="{ name: 'admin.edit-account', query: { userId: user.id, } }">
+                Edit
+              </router-link>
+              <button @click="deleteUser(user.id)" class="btn btn-danger">Archive</button>
             </td>
           </tr>
         </tbody>
@@ -74,10 +75,9 @@
   </ion-content>
 </template>
 
-
 <script>
 import axios from 'axios';
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters } from 'vuex';
 import { GET_USER_TOKEN } from '@/store/storeConstants.js'
 export default {
   name: 'AccountManagement',
@@ -90,7 +90,8 @@ export default {
       userRole: '',
       submitError: '',
       departments: [],
-      users: []
+      users: [],
+      userId: '', 
     };
   },
   computed: {
@@ -99,45 +100,52 @@ export default {
     })
   },
   methods: {
-    submitForm() {
-      if (!this.userName || !this.userEmail || !this.userPassword || !this.userDepartment) {
+    async submitForm() {
+      if (!this.userName || !this.userEmail || !this.userPassword || !this.userDepartment || !this.userRole) {
         this.submitError = 'Please fill out all fields.';
         return;
       }
 
-      axios.post('register', {
-        name: this.userName,
-        email: this.userEmail,
-        password: this.userPassword,
-        department_id: this.userDepartment,
-        role: this.userRole
-      }, {
-        headers: {
-          Authorization: 'Bearer ' + this.token
-        }
-      })
-        .then(response => {
-          //this.users.push(response.data);
-          this.userName = '';
-          this.userEmail = '';
-          this.userPassword = '';
-          this.userDepartment = '';
-          this.userRole = '';
-          this.submitError = '';
-          console.log(response)
-        })
-        .catch(error => {
-          if (error.response && error.response.data && error.response.data.message) {
-            this.submitError = error.response.data.message;
-          } else {
-            this.submitError = 'An error occurred.';
+      try {
+        const response = await axios.post('register', {
+          name: this.userName,
+          email: this.userEmail,
+          password: this.userPassword,
+          department_id: this.userDepartment,
+          role: this.userRole
+        }, {
+          headers: {
+            Authorization: 'Bearer ' + this.token
           }
         });
+
+        this.userName = '';
+        this.userEmail = '';
+        this.userPassword = '';
+        this.userDepartment = '';
+        this.userRole = '';
+        this.submitError = '';
+
+        this.fetchUsers();
+
+        console.log(response);
+      } catch (error) {
+        if (error.response && error.response.data && error.response.data.message) {
+          this.submitError = error.response.data.message;
+        } else {
+          this.submitError = 'An error occurred.';
+        }
+      }
     },
     async deleteUser(userId) {
       try {
-        await axios.delete(`users/${userId}`);
-        this.fetchUsers();
+        await axios.delete(`users/${userId}`, {
+          headers: {
+            Authorization: 'Bearer ' + this.token
+          }
+        });
+
+        this.users = this.users.filter(user => user.id !== userId);
         alert('User removed successfully');
       } catch (error) {
         console.error('Error removing user:', error.message);
@@ -145,7 +153,21 @@ export default {
       }
     },
     editUser(userId) {
-
+      // Logic for editing user
+    },
+    fetchDepartments() {
+      axios.get('/retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+        .then(response => {
+          console.log(response);
+          this.departments = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching departments:', error);
+        });
     },
     fetchUsers() {
       axios.get('user-retrieve', {
@@ -155,15 +177,21 @@ export default {
       })
         .then(response => {
           console.log(response);
-          this.users = response.data;
+          this.users = response.data.users;
         })
         .catch(error => {
           console.error('Error fetching users:', error);
         });
     },
+    getDepartmentName(departmentId) {
+      const department = this.departments.find(dep => dep.id === departmentId);
+      return department ? department.name : 'Unknown';
+    },
   },
   mounted() {
+    this.fetchDepartments();
     this.fetchUsers();
+
   }
 };
 </script>
@@ -195,7 +223,7 @@ export default {
 
 .btn-primary {
   margin-top: 22px;
-  background-color: #007bff;
+  background-color: #28a745;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -267,8 +295,8 @@ export default {
 }
 
 .form-summary-table {
-  width: 65%;
-  margin-left: 18%;
+  width: 80%;
+  margin-left: 10%;
   margin-top: 30px;
   border-collapse: collapse;
 }
@@ -282,5 +310,21 @@ export default {
 
 .form-summary-table th {
   background-color: #f0f0f0;
+}
+
+.edit-button {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.edit-button:hover {
+  background-color: #138496;
 }
 </style>

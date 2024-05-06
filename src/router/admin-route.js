@@ -139,4 +139,14 @@ export const adminRoute = (prop) => [{
     },
     component: () => import('../views/Students/Dashboard/Calendar.vue')
   },
+  {
+    path: '/admin/edit-account/',
+    name: 'admin.edit-account',
+    meta: {
+      auth: true,
+      name: 'Edit Account',
+      user: 'admin'
+    },
+    component: () => import('../views/Students/Management/Settings/EditAccount.vue')
+  },
 ]
