@@ -49,7 +49,7 @@
           <tr v-for="form in forms" :key="form.id">
             <td>{{ form.file_name }}</td>
             <td>{{ form.description }}</td>
-            <td>{{ getDepartmentName(form.department_id) }}</td>
+            <td>{{ form.department.name }}</td>
             <td>
               <router-link class="btn btn-primary" :to="{ name: 'admin.upload-forms', query: { formId: form.id, } }">
                 Edit
@@ -133,6 +133,7 @@ export default {
         }
       })
         .then(response => {
+          console.log(response)
           this.forms = response.data;
         })
         .catch(error => {
@@ -169,10 +170,6 @@ export default {
           console.error('Error archiving form:', error.message);
           alert('Error archiving form: ' + error.message);
         });
-    },
-    getDepartmentName(departmentId) {
-      const department = this.departments.find(dep => dep.id === departmentId);
-      return department ? department.name : 'Unknown';
     },
     editForm(form) {
       console.log(form.id);

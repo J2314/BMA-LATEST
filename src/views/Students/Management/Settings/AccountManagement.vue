@@ -60,10 +60,11 @@
             <td>{{ user.id }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ getDepartmentName(user.department_id) }}</td>
+            <td>{{ user.department_id}}</td>
             <td>{{ user.role }}</td>
             <td>
-              <router-link class="btn btn-info edit-button" :to="{ name: 'admin.edit-account', query: { userId: user.id, } }">
+              <router-link class="btn btn-info edit-button"
+                :to="{ name: 'admin.edit-account', query: { userId: user.id, name: user.name, email: user.email, department: user.department_id, role: user.role } }">
                 Edit
               </router-link>
               <button @click="deleteUser(user.id)" class="btn btn-danger">Archive</button>
@@ -91,7 +92,7 @@ export default {
       submitError: '',
       departments: [],
       users: [],
-      userId: '', 
+      userId: '',
     };
   },
   computed: {
@@ -183,10 +184,6 @@ export default {
           console.error('Error fetching users:', error);
         });
     },
-    getDepartmentName(departmentId) {
-      const department = this.departments.find(dep => dep.id === departmentId);
-      return department ? department.name : 'Unknown';
-    },
   },
   mounted() {
     this.fetchDepartments();
@@ -199,7 +196,6 @@ export default {
 <style scoped>
 .content-wrapper {
   padding: 20px;
-  margin-top: 60px;
 }
 
 .add-form {
