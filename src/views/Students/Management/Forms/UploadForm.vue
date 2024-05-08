@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-md-6">
           <form @submit.prevent="uploadFile" class="add-form">
-            <h1 class="form-title">Upload Form</h1>
+            <h1 class="form-title text-primary">UPLOAD FORM</h1>
             <div class="form-group">
               <label for="formName" class="form-label">Form Name:</label>
               <input type="text" id="formName" class="form-control" v-model="fileName" placeholder="Enter form name"
@@ -55,7 +55,6 @@
     </div>
   </ion-content>
 </template>
-
 
 <script>
 import axios from 'axios';

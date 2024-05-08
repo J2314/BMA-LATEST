@@ -2,7 +2,7 @@
   <ion-content>
     <div class="content-wrapper">
       <form @submit.prevent="submitForm" class="add-form">
-        <h1 class="form-title">Account Management</h1>
+        <h1 class="form-title text-primary">ACCOUNT MANAGEMENT</h1>
         <div class="form-table-container">
           <table class="form-table">
             <tr>
@@ -140,17 +140,17 @@ export default {
     },
     async deleteUser(userId) {
       try {
-        await axios.delete(`users/${userId}`, {
+        const response = await axios.put(`archive-users/${userId}`, null, {
           headers: {
             Authorization: 'Bearer ' + this.token
           }
         });
 
         this.users = this.users.filter(user => user.id !== userId);
-        alert('User removed successfully');
+        alert('User archived successfully');
       } catch (error) {
-        console.error('Error removing user:', error.message);
-        alert('Error removing user: ' + error.message);
+        console.error('Error archiving user:', error.message);
+        alert('Error archiving user: ' + error.message);
       }
     },
     editUser(userId) {

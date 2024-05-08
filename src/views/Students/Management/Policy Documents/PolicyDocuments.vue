@@ -5,7 +5,7 @@
         <div class="col-md-7">
           <div class="add-form">
             <form @submit.prevent="submitForm">
-              <h1 class="form-title">Add Policy Documents</h1>
+              <h1 class="form-title text-primary"><STRONG>ADD POLICY DOCUMENTS</STRONG></h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Document Type:</label>
                 <select id="documentType" class="form-control" v-model="document_type">
@@ -45,7 +45,7 @@
                   <th scope="col">#</th>
                   <th id="documentType" scope="col">Document Type</th>
                   <th id="documentName" scope="col">Document Name</th>
-                  <th id="filePath" scope="col">File Path</th>
+                  <th id="department" scope="col">Department</th>
                   <th id="actions" scope="col">Actions</th>
                 </tr>
               </thead>
@@ -54,7 +54,7 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ policy.document_type }}</td>
                   <td>{{ policy.document_name }}</td>
-                  <td>{{ policy.file_path }}</td>
+                  <td>{{ getDepartmentName(policy.department_id) }}</td>
                   <td><button id="btnView" type="button" class="btn btn-secondary"
                       @click="openPdf(policy.id)">View</button></td>
                 </tr>
@@ -106,20 +106,7 @@ export default {
           console.log(fileContent)
           const pdfViewer = this.$refs.pdfViewer;
           pdfViewer.src = fileContent;
-
-          // axios.post('increment-view-count', {
-          //   formFileId: polId, 
-          //   user_id: this.userId
-          // })
-          //   .then(response => {
-          //     console.log(response.data.message);
-          //     console.log(polId);
-          //   })
-          //   .catch(error => {
-          //     console.error('Error recording view:', error);
-          //   });
         })
-        
         .catch(error => {
           console.error('Error fetching file content:', error);
         });
@@ -189,7 +176,6 @@ export default {
         })
         .catch(error => {
           console.error('Error fetching departments:', error);
-          // Handle the error as per your requirements, e.g., show an error message to the user
         });
     },
     handleSuccess() {
@@ -199,7 +185,11 @@ export default {
       this.department_id = '';
       this.$refs.file.value = null;
       this.fetchPolicies();
-      this.formErrors = {}; // Clear form errors
+      this.formErrors = {}; 
+    },
+    getDepartmentName(departmentId) {
+      const department = this.departments.find(dep => dep.id === departmentId);
+      return department ? department.name : '';
     },
   },
   mounted() {
@@ -208,6 +198,7 @@ export default {
   }
 }
 </script>
+
 
 
 <style scoped>

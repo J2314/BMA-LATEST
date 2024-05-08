@@ -57,7 +57,8 @@ export default {
 
         const settings = [
             { name: 'Profile', url: '/admin/AddProcedures' },
-            { name: 'Account Management', url: '/admin/Account-Management' }
+            { name: 'Account Management', url: '/admin/Account-Management' },
+            { name: 'Activity Log', url: '/admin/Account-Management' }
         ];
 
         const items = [

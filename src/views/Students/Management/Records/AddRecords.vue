@@ -5,7 +5,7 @@
         <div class="col-md-7">
           <div class="add-form">
             <form @submit.prevent="submitForm">
-              <h1 class="form-title">Add Records</h1>
+              <h1 class="form-title text-primary"><STRONG>ADD RECORDS</STRONG></h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Record Type:</label>
                 <select id="documentType" class="form-control" v-model="recordType">

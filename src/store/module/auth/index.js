@@ -66,7 +66,6 @@ export default {
             return context.dispatch(AUTH_ACTION, {
                 ...payload,
                 url: 'login',
-                userType: 'admin'
             })
         },
         async [APPLICANT_LOGIN_ACTION](context, payload) {
@@ -95,7 +94,7 @@ export default {
                         email: response.data.user.email, 
                         token: response.data.token,
                         userId: response.data.user.id,
-                        userType: payload.userType
+                        userType: response.data.user.user_roles.role
                     }
                     localStorage.setItem('userData', JSON.stringify(tokenData))
                     context.commit(SET_USER_TOKEN_MUTATION, tokenData)

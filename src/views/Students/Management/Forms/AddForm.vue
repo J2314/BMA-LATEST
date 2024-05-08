@@ -2,7 +2,7 @@
   <ion-content class="ion-padding">
     <div class="content-wrapper">
       <form @submit.prevent="submitForm" class="add-form">
-        <h1 class="form-title">Add Forms</h1>
+        <h1 class="form-title text-primary">ADD FORMS</h1>
         <div class="form-table-container">
           <table class="form-table">
             <tr>

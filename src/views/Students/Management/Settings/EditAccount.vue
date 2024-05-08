@@ -4,7 +4,7 @@
       <router-link class="btn btn-primary btn-bck" to="/admin/Account-Management">
         Back
       </router-link>
-      <h1 class="form-title">Account Details</h1>
+      <h1 class="form-title text-primary">ACCOUNT DETAILS</h1>
       <div class="form-container">
         <div class="form-group">
           <label for="name" class="form-label">Name</label>
@@ -117,7 +117,7 @@ export default {
       }
     },
     async saveDetails() {
-
+      
     },
   },
   mounted() {
@@ -140,7 +140,7 @@ export default {
 }
 
 .form-title {
-  font-size: 24px;
+  font-size: 45px;
   font-weight: bold;
   color: #333;
   margin-bottom: 20px;

@@ -2,17 +2,16 @@
   <ion-content>
     <div class="content-wrapper">
       <div class="row">
-        <div class="col-md-7"> <!-- Adjusted column width -->
+        <div class="col-md-7">
           <div class="add-form">
             <form @submit.prevent="submitForm">
-              <h1 class="form-title">Add Procedures</h1>
+              <h1 class="form-title text-primary"><STRONG>ADD PROCEDURES</STRONG></h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Procedure Type:</label>
                 <select id="documentType" class="form-control" v-model="document_type">
                   <option value="" disabled selected>Select Procedure Type</option>
                   <option value="Document Control Procedure">Document Control Procedure</option>
-                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action
-                    (CAPA) Procedure</option>
+                  <option value="Corrective and Preventive Action (CAPA) Procedure">Corrective and Preventive Action (CAPA) Procedure</option>
                   <option value="Internal Audit Procedure">Internal Audit Procedure</option>
                   <option value="Management Review Procedure">Management Review Procedure</option>
                   <option value="Risk Management Review Procedure">Risk Management Review Procedure</option>
@@ -22,14 +21,12 @@
                 <label for="departmentId" class="form-label">Department:</label>
                 <select id="departmentId" class="form-control" v-model="department_id">
                   <option value="">Select Department</option>
-                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
-              department.name }}</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
                 </select>
               </div>
               <div class="form-group">
                 <label for="documentName" class="form-label">Document Name:</label>
-                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name"
-                  placeholder="Enter document name">
+                <input type="text" id="documentName" class="form-control smaller-input" v-model="document_name" placeholder="Enter document name">
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
@@ -47,7 +44,7 @@
                   <th scope="col">#</th>
                   <th id="documentType" scope="col">Procedure Type</th>
                   <th id="documentName" scope="col">Document Name</th>
-                  <th id="filePath" scope="col">File Path</th>
+                  <th id="department" scope="col">Department</th>
                   <th id="actions" scope="col">Actions</th>
                 </tr>
               </thead>
@@ -56,15 +53,14 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ procedure.document_type }}</td>
                   <td>{{ procedure.document_name }}</td>
-                  <td>{{ procedure.file_path }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary"
-                      @click="openPdf(procedure.id)">View</button></td>
+                  <td>{{ getDepartmentName(procedure.department_id) }}</td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary" @click="openPdf(procedure.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div class="col-md-5"> <!-- Adjusted column width -->
+        <div class="col-md-5">
           <div class="pdf-viewer-container">
             <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer"></iframe>
           </div>
@@ -87,7 +83,7 @@ export default {
       department_id: '',
       document_name: '',
       procedures: [],
-      departments: [] // Assuming you have departments data to populate the select options
+      departments: []
     };
   },
   computed: {
@@ -103,10 +99,9 @@ export default {
         }
       })
         .then(response => {
-          console.log(response)
+          console.log(response);
           const fileContent = response.data.procedure.file_path;
           const pdfViewer = this.$refs.pdfViewer;
-
           pdfViewer.src = fileContent;
         })
         .catch(error => {
@@ -179,18 +174,18 @@ export default {
         .catch(error => {
           console.error('Error fetching departments:', error);
         });
+    },
+    getDepartmentName(departmentId) {
+      const department = this.departments.find(dep => dep.id === departmentId);
+      return department ? department.name : '';
     }
-
   },
   mounted() {
     this.fetchProcedures();
-    this.fetchDepartments(); // Call fetchDepartments when the component is mounted
+    this.fetchDepartments();
   }
-
 }
 </script>
-
-
 
 <style scoped>
 .content-wrapper {

@@ -5,7 +5,7 @@
         <div class="col-md-7">
           <div class="add-form">
             <form @submit.prevent="submitForm">
-              <h1 class="form-title">Add Work Instruction</h1>
+              <h1 class="form-title text-primary"><strong>ADD WORK INSTRUCTIONS</strong></h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Document Type:</label>
                 <select id="documentType" class="form-control" v-model="document_type">
@@ -21,9 +21,19 @@
                   placeholder="Enter document name">
               </div>
               <div class="form-group">
+                <label for="departmentId" class="form-label">Department:</label>
+                <select id="departmentId" class="form-control" v-model="selected_department">
+                  <option value="" disabled selected>Select Department</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
+              department.name }}</option>
+                </select>
+              </div>
+              <div class="form-group">
                 <label for="employee" class="form-label">Employee:</label>
-                <input type="text" id="employee" class="form-control smaller-input" v-model="employee"
-                  placeholder="Enter employee name">
+                <select id="employee" class="form-control smaller-input" v-model="employee">
+                  <option value="" disabled selected>Select Employee</option>
+                  <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                </select>
               </div>
               <div class="form-group">
                 <label for="file" class="form-label">Choose File:</label>
@@ -42,7 +52,7 @@
                   <th id="documentType" scope="col">Document Type</th>
                   <th id="documentName" scope="col">Document Name</th>
                   <th id="employee" scope="col">Employee</th>
-                  <th id="filePath" scope="col">File Path</th>
+                  <th id="department" scope="col">Department</th>
                   <th id="actions" scope="col">Actions</th>
                 </tr>
               </thead>
@@ -51,8 +61,8 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ instruction.document_type }}</td>
                   <td>{{ instruction.document_name }}</td>
-                  <td>{{ instruction.employee }}</td>
-                  <td>{{ instruction.file_path }}</td>
+                  <td>{{ instruction.user_id }}</td>
+                  <td>{{ getDepartmentName(instruction.department_id) }}</td>
                   <td><button id="btnView" type="button" class="btn btn-secondary"
                       @click="openPdf(instruction.id)">View</button></td>
                 </tr>
@@ -82,8 +92,11 @@ export default {
       document_type: '',
       document_name: '',
       employee: '',
+      selected_department: '',
       instructions: [],
-      file: null, 
+      file: null,
+      users: [],
+      departments: [],
     };
   },
   computed: {
@@ -101,7 +114,6 @@ export default {
         .then(response => {
           const fileContent = response.data.work.file_path;
           const pdfViewer = this.$refs.pdfViewer;
-          console.log(response)
           pdfViewer.src = fileContent;
         })
         .catch(error => {
@@ -109,7 +121,7 @@ export default {
         });
     },
     submitForm() {
-      if (!this.document_type || !this.document_name || !this.employee || !this.file) {
+      if (!this.document_type || !this.document_name || !this.employee || !this.file || !this.selected_department) {
         alert('Please fill out all fields and select a file.');
         return;
       }
@@ -118,21 +130,24 @@ export default {
       formData.append('file', this.file);
       formData.append('document_type', this.document_type);
       formData.append('document_name', this.document_name);
-      formData.append('employee_name', this.employee); 
+      formData.append('user_id', this.employee); 
+      formData.append('department_id', this.selected_department);
 
       axios.post('upload-work', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data', 
+          'Content-Type': 'multipart/form-data',
           Authorization: 'Bearer ' + this.token
         }
       })
         .then(response => {
+          console.log(response)
           if (response.status === 200) {
             alert('File uploaded successfully.');
             this.document_type = '';
             this.document_name = '';
             this.employee = '';
             this.file = null;
+            this.selected_department = '';
             this.fetchInstructions();
           } else {
             alert('Error uploading file.');
@@ -150,8 +165,8 @@ export default {
         }
       })
         .then(response => {
-          this.instructions = response.data;
           console.log(response)
+          this.instructions = response.data;
         })
         .catch(error => {
           console.error('Error fetching instructions:', error);
@@ -160,16 +175,48 @@ export default {
     fileSelected(event) {
       const files = event.target.files;
       if (files.length > 0) {
-        this.file = files[0]; 
+        this.file = files[0];
       }
     },
+    fetchUsers() {
+      axios.get('user-retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+        .then(response => {
+          console.log(response)
+          this.users = response.data.users;
+        })
+        .catch(error => {
+          console.error('Error fetching users:', error);
+        });
+    },
+    fetchDepartments() {
+      axios.get('retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
+        .then(response => {
+          this.departments = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching departments:', error);
+        });
+    },
+    getDepartmentName(departmentId) {
+      const department = this.departments.find(dep => dep.id === departmentId);
+      return department ? department.name : '';
+    }
   },
-  mounted() {
+  mounted() { 
     this.fetchInstructions();
+    this.fetchUsers();
+    this.fetchDepartments();
   }
 }
 </script>
-
 
 <style scoped>
 .content-wrapper {

@@ -3,7 +3,7 @@
     <div>
       <div class="content-wrapper">
         <form @submit.prevent="submitForm" class="add-form">
-          <h1 class="form-title">Add Department</h1>
+          <h1 class="form-title text-primary"><STRONG>ADD DEPARTMENTS</STRONG></h1>
           <div class="form-table-container">
             <table class="form-table">
               <tr>
