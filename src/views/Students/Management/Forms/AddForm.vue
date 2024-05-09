@@ -23,8 +23,7 @@
                 <label for="formDepartment" class="form-label">Department</label>
                 <select id="formDepartment" class="form-control" v-model="formDepartment">
                   <option value="">Select Department</option>
-                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
-        department.name }}</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="String(department.id)">{{ department.name }}</option>
                 </select>
               </td>
               <td class="button-cell">
@@ -36,17 +35,25 @@
         <span v-if="submitSuccess" class="success-message">Form submitted successfully!</span>
         <span v-if="submitError" class="error-message">{{ submitError }}</span>
       </form>
+      <div class="search-department-container">
+        <div class="search-bar">
+          <input type="text" class="form-control" v-model="searchKeyword" placeholder="Search forms...">
+        </div>
+        <div class="department-filter">
+          <select id="departmentFilter" class="form-control" v-model="selectedDepartment">
+            <option value="">All Departments</option>
+            <option v-for="(department, index) in departments" :key="index" :value="String(department.id)">{{ department.name }}</option>
+          </select>
+        </div>
+      </div>
       <table class="form-summary-table">
         <thead>
           <tr>
-            <th>Form Name</th>
-            <th>Description</th>
-            <th>Department</th>
-            <th>Action</th>
+            <th v-for="(header, index) in tableHeaders" :key="index">{{ header }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="form in forms" :key="form.id">
+          <tr v-for="form in filteredForms" :key="form.id">
             <td>{{ form.file_name }}</td>
             <td>{{ form.description }}</td>
             <td>{{ form.department.name }}</td>
@@ -77,14 +84,32 @@ export default {
       formDescription: '',
       formDepartment: '',
       submitError: '',
+      submitSuccess: false,
       departments: [],
       forms: [],
+      searchKeyword: '',
+      selectedDepartment: '',
+      tableHeaders: ['Form Name', 'Description', 'Department', 'Action']
     };
   },
   computed: {
     ...mapGetters('auth', {
       token: GET_USER_TOKEN
-    })
+    }),
+    filteredForms() {
+      let filtered = this.forms;
+      if (this.selectedDepartment) {
+        filtered = filtered.filter(form => String(form.department.id) === this.selectedDepartment);
+      }
+      if (this.searchKeyword.trim() !== '') {
+        const keyword = this.searchKeyword.toLowerCase();
+        filtered = filtered.filter(form =>
+          form.file_name.toLowerCase().includes(keyword) ||
+          form.description.toLowerCase().includes(keyword)
+        );
+      }
+      return filtered;
+    }
   },
   methods: {
     submitForm() {
@@ -107,6 +132,7 @@ export default {
           // Reset form fields and fetch updated forms
           this.resetFormFields();
           this.fetchForms();
+          this.submitSuccess = true;
         })
         .catch(error => {
           // Handle error
@@ -133,7 +159,6 @@ export default {
         }
       })
         .then(response => {
-          console.log(response)
           this.forms = response.data;
         })
         .catch(error => {
@@ -146,6 +171,7 @@ export default {
       this.formDescription = '';
       this.formDepartment = '';
       this.submitError = '';
+      this.submitSuccess = false;
     },
     handleError(error) {
       if (error.response && error.response.data && error.response.data.message) {
@@ -170,22 +196,7 @@ export default {
           console.error('Error archiving form:', error.message);
           alert('Error archiving form: ' + error.message);
         });
-    },
-    editForm(form) {
-      console.log(form.id);
-      console.log(form.department.name);
-      console.log(form.file_name);
-      this.$router.push({
-        name: 'admin.upload-forms',
-        params: {
-          formId: form.id,
-          departmentName: form.department.name,
-          fileName: form.file_name,
-        }
-      });
-    },
-
-
+    }
   },
   mounted() {
     this.fetchDepartments();
@@ -197,7 +208,6 @@ export default {
 <style scoped>
 .content-wrapper {
   padding: 20px;
-
 }
 
 .add-form {
@@ -308,5 +318,21 @@ export default {
 
 .form-summary-table th {
   background-color: #f0f0f0;
+}
+
+.search-department-container {
+  display: flex;
+  justify-content: center; /* Align items horizontally */
+  margin-top: 20px;
+}
+
+.search-bar,
+.department-filter {
+  margin-right: 20px;
+}
+
+.search-bar input,
+.department-filter select {
+  width: auto;
 }
 </style>

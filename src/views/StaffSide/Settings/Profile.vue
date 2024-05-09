@@ -2,7 +2,7 @@
     <div class="profile-container">
       <div class="profile-header">
         <div class="profile-frame">
-          <!-- <img src="./Screenshot 2024-03-12 163138.png" alt="Profile Picture" class="profile-picture"> -->
+          <img src="./Screenshot 2024-03-12 163138.png" alt="Profile Picture" class="profile-picture">
           <h2 class="employee-name">Saks lang</h2>
         </div>
       </div>

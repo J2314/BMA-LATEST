@@ -53,6 +53,10 @@ export default {
             { name: 'Department Forms', url: '/staff/Department-Form' }
         ];
 
+        const procedure = [
+            { name: 'Procedures Documents', url: '/staff/Procedure' },
+        ];
+
         const setting = [
             { name: 'Profile', url: '/staff/Profile' },
         ];
@@ -61,6 +65,7 @@ export default {
             { name: 'Dashboard', child: dashboard},
             { name: 'Policy Documents', child: policy },
             { name: 'Forms', child: form },
+            { name: 'Procedures', child: procedure },
             { name: 'Settings', child: setting },
         ];
 

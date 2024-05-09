@@ -1,57 +1,67 @@
 <template>
   <ion-content>
-    <div>
-      <div class="content-wrapper">
-        <form @submit.prevent="submitForm" class="add-form">
-          <h1 class="form-title text-primary"><STRONG>ADD DEPARTMENTS</STRONG></h1>
-          <div class="form-table-container">
-            <table class="form-table">
-              <tr>
-                <td>
-                  <label for="departmentName" class="form-label">Department Name</label>
-                  <input type="text" id="departmentName" class="form-control" v-model="departmentName"
-                    placeholder="Enter name">
-                </td>
-                <td>
-                  <label for="departmentCode" class="form-label">Department Code</label>
-                  <input type="text" id="departmentCode" class="form-control" v-model="departmentCode"
-                    placeholder="Enter code">
-                </td>
-                <td class="button-cell" colspan="2">
-                  <button type="submit" class="btn btn-primary">Add</button>
-                </td>
-              </tr>
-            </table>
-          </div>
-          <span v-if="submitError" class="error-message">{{ submitError }}</span>
-        </form>
-        <table class="form-summary-table">
-          <thead>
+    <div class="content-wrapper">
+      <form @submit.prevent="submitForm" class="add-form">
+        <h1 class="form-title text-primary"><strong>ADD DEPARTMENTS</strong></h1>
+        <div class="form-table-container">
+          <table class="form-table">
             <tr>
-              <th>Department Name</th>
-              <th>Department Code</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="department in departments" :key="department.id">
-              <td>{{ department.name }}</td>
-              <td>{{ department.code }}</td>
               <td>
-                <button @click="deleteDepartment(department.id)" class="btn btn-danger">Archive</button>
+                <label for="departmentName" class="form-label">Department Name</label>
+                <input type="text" id="departmentName" class="form-control" v-model="departmentName" placeholder="Enter name">
+              </td>
+              <td>
+                <label for="departmentCode" class="form-label">Department Code</label>
+                <input type="text" id="departmentCode" class="form-control" v-model="departmentCode" placeholder="Enter code">
+              </td>
+              <td class="button-cell" colspan="2">
+                <button type="submit" class="btn btn-primary">Add</button>
               </td>
             </tr>
-          </tbody>
-        </table>
+          </table>
+        </div>
+        <span v-if="submitError" class="error-message">{{ submitError }}</span>
+      </form>
+      <div class="search-department-container">
+        <!-- Search bar -->
+        <div class="search-bar">
+          <input type="text" class="form-control" v-model="searchKeyword" placeholder="Search departments...">
+        </div>
+        <!-- Department filter -->
+        <div class="department-filter">
+          <select id="departmentFilter" class="form-control" v-model="selectedDepartment">
+            <option value="">All Departments</option>
+            <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
+          </select>
+        </div>
       </div>
+      <table class="form-summary-table">
+        <thead>
+          <tr>
+            <th>Department Name</th>
+            <th>Department Code</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="department in filteredDepartments" :key="department.id">
+            <td>{{ department.name }}</td>
+            <td>{{ department.code }}</td>
+            <td>
+              <button @click="deleteDepartment(department.id)" class="btn btn-danger">Archive</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </ion-content>
 </template>
 
 <script>
 import axios from 'axios';
-import { mapGetters, mapMutations } from 'vuex';
+import { mapGetters } from 'vuex';
 import { GET_USER_TOKEN } from '@/store/storeConstants.js'
+
 export default {
   name: 'AddDepartmentPage',
   data() {
@@ -60,13 +70,28 @@ export default {
       departmentCode: '',
       submitError: '',
       departments: [],
-      is_Active: true
+      searchKeyword: '',
+      selectedDepartment: ''
     };
   },
   computed: {
     ...mapGetters('auth', {
       token: GET_USER_TOKEN
-    })
+    }),
+    filteredDepartments() {
+      let filtered = this.departments;
+      if (this.selectedDepartment) {
+        filtered = filtered.filter(department => department.id === this.selectedDepartment);
+      }
+      if (this.searchKeyword.trim() !== '') {
+        const keyword = this.searchKeyword.toLowerCase();
+        filtered = filtered.filter(department =>
+          department.name.toLowerCase().includes(keyword) ||
+          department.code.toLowerCase().includes(keyword)
+        );
+      }
+      return filtered;
+    }
   },
   methods: {
     submitForm() {
@@ -76,8 +101,7 @@ export default {
       }
       axios.post('department', {
         name: this.departmentName,
-        code: this.departmentCode,
-        is_Active: this.is_Active
+        code: this.departmentCode
       }, {
         headers: {
           Authorization: 'Bearer ' + this.token
@@ -99,8 +123,6 @@ export default {
     },
     async deleteDepartment(depId) {
       try {
-        console.log('Deleting department with ID:', depId);
-
         await axios.put(`archive/${depId}`);
         alert('Department archived successfully');
         this.fetchDepartments();
@@ -122,7 +144,6 @@ export default {
           console.error('Error fetching departments:', error);
         });
     }
-
   },
   mounted() {
     this.fetchDepartments();
@@ -130,11 +151,9 @@ export default {
 }
 </script>
 
-
 <style scoped>
 .content-wrapper {
   padding: 20px;
-
 }
 
 .add-form {
@@ -232,7 +251,7 @@ export default {
 .form-summary-table {
   width: 65%;
   margin-left: 18%;
-  margin-top: 30px;
+  margin-top: 15px;
   border-collapse: collapse;
 }
 
@@ -246,4 +265,21 @@ export default {
 .form-summary-table th {
   background-color: #f0f0f0;
 }
+
+.search-department-container {
+  display: flex;
+  margin-left: 500px;
+}
+
+.search-bar,
+.department-filter {
+  margin-top: 20px;
+  margin-right: 20px;
+}
+
+.search-bar input,
+.department-filter select {
+  width: auto;
+}
+
 </style>

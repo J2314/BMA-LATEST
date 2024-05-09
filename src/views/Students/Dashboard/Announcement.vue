@@ -4,22 +4,26 @@
       <h2>Add Announcement</h2>
       <div class="form-group">
         <label for="announcementTitle">Title</label>
-        <input v-model="newAnnouncement.title" type="text" class="form-control" id="announcementTitle" placeholder="Enter title">
+        <input v-model="newAnnouncement.title" type="text" class="form-control" id="announcementTitle"
+          placeholder="Enter title">
       </div>
       <div class="form-group">
         <label for="announcementDepartment">Department</label>
         <select id="departmentId" class="form-control" v-model="newAnnouncement.department">
           <option value="">Select Department</option>
-          <option v-for="(department, index) in departments" :key="index" :value="department.name">{{ department.name }}</option>
+          <option v-for="(department, index) in departments" :key="index" :value="department.name">{{ department.name }}
+          </option>
         </select>
       </div>
       <div class="form-group">
         <label for="announcementDescription">Description</label>
-        <input v-model="newAnnouncement.description" type="text" class="form-control" id="announcementDescription" placeholder="Enter description">
+        <input v-model="newAnnouncement.description" type="text" class="form-control" id="announcementDescription"
+          placeholder="Enter description">
       </div>
       <div class="form-group">
         <label for="announcementContent">Content</label>
-        <textarea v-model="newAnnouncement.content" class="form-control" id="announcementContent" rows="4" placeholder="Enter content"></textarea>
+        <textarea v-model="newAnnouncement.content" class="form-control" id="announcementContent" rows="4"
+          placeholder="Enter content"></textarea>
       </div>
       <button @click="postAnnouncement" class="btn btn-success">{{ editingIndex === -1 ? 'Post' : 'Update' }}</button>
     </div>
@@ -45,6 +49,8 @@
 
 <script>
 import axios from 'axios';
+import { mapGetters } from 'vuex';
+import { GET_USER_TOKEN } from '@/store/storeConstants.js';
 
 export default {
   name: 'AnnouncementsPage',
@@ -53,23 +59,39 @@ export default {
       announcements: [],
       newAnnouncement: {
         title: '',
-        department: '', 
+        department: '',
         description: '',
         content: ''
       },
       editingIndex: -1,
-      departments: [] 
+      departments: []
     };
   },
+  computed: {
+    ...mapGetters('auth', {
+      token: GET_USER_TOKEN
+    })
+  },
   methods: {
-    postAnnouncement() {
-      if (this.editingIndex === -1) {
-        this.announcements.push({ ...this.newAnnouncement });
-      } else {
-        this.announcements[this.editingIndex] = { ...this.newAnnouncement };
-        this.editingIndex = -1;
+    async postAnnouncement() {
+      try {
+        const response = await axios.post('announcement', this.newAnnouncement, {
+          headers: {
+            Authorization: 'Bearer ' + this.token
+          }
+        });
+
+        if (this.editingIndex === -1) {
+          this.announcements.push(response.data);
+        } else {
+          this.announcements[this.editingIndex] = response.data;
+          this.editingIndex = -1;
+        }
+
+        this.resetForm();
+      } catch (error) {
+        console.error('Error posting announcement:', error);
       }
-      this.resetForm();
     },
     editAnnouncement(index) {
       this.newAnnouncement = { ...this.announcements[index] };
@@ -86,16 +108,19 @@ export default {
         content: ''
       };
     },
-
     fetchDepartments() {
-      axios.get('http://127.0.0.1:8000/api/retrieve')
+      axios.get('retrieve', {
+        headers: {
+          Authorization: 'Bearer ' + this.token
+        }
+      })
         .then(response => {
           this.departments = response.data;
         })
         .catch(error => {
           console.error('Error fetching departments:', error);
         });
-    }
+    },
   },
   mounted() {
     this.fetchDepartments();
@@ -131,7 +156,8 @@ export default {
   overflow-y: auto;
 }
 
-.add-announcement h2, .announcements-container h2 {
+.add-announcement h2,
+.announcements-container h2 {
   margin-top: 0;
   margin-bottom: 20px;
 }

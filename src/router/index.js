@@ -52,6 +52,7 @@ const authRoute = (prop) => [
 const routes = [
   {
     path: '/',
+    redirect:'/login',
     name: 'client-layout',
     component: () => import('@/components/layouts/AuthLayout.vue'),
     children: authRoute('client-layout')

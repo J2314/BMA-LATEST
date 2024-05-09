@@ -45,6 +45,22 @@
             </form>
           </div>
           <div id="cusTable" class="table-wrapper mt-3">
+            <!-- Search bar and Department filter -->
+            <div class="search-department-container">
+              <!-- Search bar -->
+              <div class="search-bar">
+                <input type="text" class="form-control" v-model="searchKeyword" placeholder="Search instructions...">
+              </div>
+              <!-- Department filter -->
+              <div class="department-filter">
+                <select id="departmentFilter" class="form-control" v-model="selectedDepartment">
+                  <option value="">All Departments</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
+              department.name }}</option>
+                </select>
+              </div>
+            </div>
+            <!-- Instructions table -->
             <table class="table table-hover">
               <thead>
                 <tr>
@@ -57,7 +73,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(instruction, index) in instructions" :key="index">
+                <tr v-for="(instruction, index) in filteredInstructions" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>{{ instruction.document_type }}</td>
                   <td>{{ instruction.document_name }}</td>
@@ -97,12 +113,32 @@ export default {
       file: null,
       users: [],
       departments: [],
+      searchKeyword: '',
+      selectedDepartment: ''
     };
   },
   computed: {
     ...mapGetters('auth', {
       token: GET_USER_TOKEN
-    })
+    }),
+    filteredInstructions() {
+      let filtered = this.instructions;
+      if (this.selectedDepartment) {
+        filtered = filtered.filter(instruction => instruction.department_id === this.selectedDepartment);
+      }
+      if (this.searchKeyword.trim() !== '') {
+        const keyword = this.searchKeyword.toLowerCase();
+        filtered = filtered.filter(instruction =>
+          (instruction.document_type || '').toLowerCase().includes(keyword) ||
+          (instruction.document_name || '').toLowerCase().includes(keyword) ||
+          ((instruction.user_id || '') + '').toLowerCase().includes(keyword) || // Ensure user_id is a string
+          this.getDepartmentName(instruction.department_id).toLowerCase().includes(keyword)
+        );
+      }
+      return filtered;
+    }
+
+
   },
   methods: {
     openPdf(workId) {
@@ -130,7 +166,7 @@ export default {
       formData.append('file', this.file);
       formData.append('document_type', this.document_type);
       formData.append('document_name', this.document_name);
-      formData.append('user_id', this.employee); 
+      formData.append('user_id', this.employee);
       formData.append('department_id', this.selected_department);
 
       axios.post('upload-work', formData, {
@@ -210,7 +246,7 @@ export default {
       return department ? department.name : '';
     }
   },
-  mounted() { 
+  mounted() {
     this.fetchInstructions();
     this.fetchUsers();
     this.fetchDepartments();
@@ -288,5 +324,25 @@ export default {
   width: 100%;
   height: 100%;
   border: none;
+}
+
+.search-department-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.search-bar,
+.department-filter {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.search-bar input {
+  width: 100%;
+}
+
+.department-filter select {
+  width: 100%;
 }
 </style>

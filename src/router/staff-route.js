@@ -78,4 +78,14 @@ export const staffRoute = (prop) => [{
     },
     component: () => import('../views/StaffSide/Settings/Profile.vue')
   },
+  {
+    path: '/staff/Procedure',
+    name: prop + '.procedures',
+    meta: {
+      auth: true,
+      name: 'Procedure Documents',
+      user: 'staff'
+    },
+    component: () => import('../views/StaffSide/Procedure/Procedures.vue')
+  },
 ]

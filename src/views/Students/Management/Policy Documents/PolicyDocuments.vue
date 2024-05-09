@@ -5,7 +5,7 @@
         <div class="col-md-7">
           <div class="add-form">
             <form @submit.prevent="submitForm">
-              <h1 class="form-title text-primary"><STRONG>ADD POLICY DOCUMENTS</STRONG></h1>
+              <h1 class="form-title text-primary"><strong>ADD POLICY DOCUMENTS</strong></h1>
               <div class="form-group">
                 <label for="documentType" class="form-label">Document Type:</label>
                 <select id="documentType" class="form-control" v-model="document_type">
@@ -24,9 +24,7 @@
                 <label for="departmentId" class="form-label">Departments:</label>
                 <select id="departmentId" class="form-control" v-model="department_id">
                   <option value="">Select Department</option>
-                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{
-              department.name
-            }}</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
                 </select>
               </div>
               <div class="form-group">
@@ -39,6 +37,21 @@
             </form>
           </div>
           <div id="cusTable" class="table-wrapper mt-3">
+            <!-- Search bar and Department filter -->
+            <div class="search-department-container">
+              <!-- Search bar -->
+              <div class="search-bar">
+                <input type="text" class="form-control" v-model="searchKeyword" placeholder="Search documents...">
+              </div>
+              <!-- Department filter -->
+              <div class="department-filter">
+                <select id="departmentFilter" class="form-control" v-model="selectedDepartment">
+                  <option value="">All Departments</option>
+                  <option v-for="(department, index) in departments" :key="index" :value="department.id">{{ department.name }}</option>
+                </select>
+              </div>
+            </div>
+            <!-- Policies table -->
             <table class="table table-hover">
               <thead>
                 <tr>
@@ -50,13 +63,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(policy, index) in policies" :key="index">
+                <tr v-for="(policy, index) in filteredPolicies" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>{{ policy.document_type }}</td>
                   <td>{{ policy.document_name }}</td>
                   <td>{{ getDepartmentName(policy.department_id) }}</td>
-                  <td><button id="btnView" type="button" class="btn btn-secondary"
-                      @click="openPdf(policy.id)">View</button></td>
+                  <td><button id="btnView" type="button" class="btn btn-secondary" @click="openPdf(policy.id)">View</button></td>
                 </tr>
               </tbody>
             </table>
@@ -86,13 +98,26 @@ export default {
       department_id: '',
       departments: [],
       policies: [],
-      formErrors: {}
+      selectedDepartment: '',
+      searchKeyword: ''
     };
   },
   computed: {
     ...mapGetters('auth', {
       token: GET_USER_TOKEN
-    })
+    }),
+    filteredPolicies() {
+      let filtered = this.selectedDepartment ? this.policies.filter(policy => policy.department_id === this.selectedDepartment) : this.policies;
+      if (this.searchKeyword) {
+        const keyword = this.searchKeyword.toLowerCase();
+        filtered = filtered.filter(policy =>
+          policy.document_type.toLowerCase().includes(keyword) ||
+          policy.document_name.toLowerCase().includes(keyword) ||
+          this.getDepartmentName(policy.department_id).toLowerCase().includes(keyword)
+        );
+      }
+      return filtered;
+    }
   },
   methods: {
     openPdf(polId) {
@@ -103,7 +128,6 @@ export default {
       })
         .then(response => {
           const fileContent = response.data.policy.file_path;
-          console.log(fileContent)
           const pdfViewer = this.$refs.pdfViewer;
           pdfViewer.src = fileContent;
         })
@@ -199,8 +223,6 @@ export default {
 }
 </script>
 
-
-
 <style scoped>
 .content-wrapper {
   padding: 20px;
@@ -272,4 +294,23 @@ export default {
   height: 100%;
   border: none;
 }
+
+.search-department-container {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar {
+  flex: 1; 
+  margin-right: 10px;
+}
+
+.department-filter {
+  flex: 1; 
+}
+
+.search-bar input {
+  width: 100%; 
+}
+
 </style>

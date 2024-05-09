@@ -23,8 +23,7 @@
                 <label for="userDepartment" class="form-label">Department</label>
                 <select id="userDepartment" class="form-control" v-model="userDepartment">
                   <option value="">Select department</option>
-                  <option v-for="department in departments" :key="department.id" :value="department.id">{{
-        department.name }}</option>
+                  <option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option>
                 </select>
               </td>
               <td>
@@ -44,6 +43,18 @@
         <span v-if="submitError" class="error-message">{{ submitError }}</span>
       </form>
 
+      <div class="search-filter-container">
+        <div class="search-container">
+          <input type="text" id="searchInput" class="form-control" v-model="searchQuery" placeholder="Search accounts">
+        </div>
+        <div class="department-filter-container">
+          <select id="departmentFilter" class="form-control" v-model="selectedDepartment">
+            <option value="">All Departments</option>
+            <option v-for="department in departments" :key="department.id" :value="department.id">{{ department.name }}</option>
+          </select>
+        </div>
+      </div>
+
       <table class="form-summary-table">
         <thead>
           <tr>
@@ -56,11 +67,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
+          <tr v-for="user in filteredUsers" :key="user.id">
             <td>{{ user.id }}</td>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.department_id}}</td>
+            <td>{{ user.department_id }}</td>
             <td>{{ user.role }}</td>
             <td>
               <router-link class="btn btn-info edit-button"
@@ -79,7 +90,8 @@
 <script>
 import axios from 'axios';
 import { mapGetters } from 'vuex';
-import { GET_USER_TOKEN } from '@/store/storeConstants.js'
+import { GET_USER_TOKEN } from '@/store/storeConstants.js';
+
 export default {
   name: 'AccountManagement',
   data() {
@@ -93,12 +105,17 @@ export default {
       departments: [],
       users: [],
       userId: '',
+      searchQuery: '',
+      selectedDepartment: ''
     };
   },
   computed: {
     ...mapGetters('auth', {
       token: GET_USER_TOKEN
-    })
+    }),
+    filteredUsers() {
+      return this.filterUsers(this.users, this.searchQuery, this.selectedDepartment);
+    }
   },
   methods: {
     async submitForm() {
@@ -184,11 +201,20 @@ export default {
           console.error('Error fetching users:', error);
         });
     },
+    filterUsers(users, searchQuery, selectedDepartment) {
+      console.log("Selected Department:", selectedDepartment);
+      return users.filter(user => {
+        console.log("User Department ID:", user.department_id);
+        return (user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.role.toLowerCase().includes(searchQuery.toLowerCase())) &&
+          (!selectedDepartment || user.department_id.toString() === selectedDepartment.toString())
+      });
+    }
   },
   mounted() {
     this.fetchDepartments();
     this.fetchUsers();
-
   }
 };
 </script>
@@ -322,5 +348,24 @@ export default {
 
 .edit-button:hover {
   background-color: #138496;
+}
+
+.search-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 800px;
+  /* Adjust as needed */
+  margin: 20px auto;
+}
+
+.search-container {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.department-filter-container {
+  flex: 1;
+  margin-left: 10px;
 }
 </style>
