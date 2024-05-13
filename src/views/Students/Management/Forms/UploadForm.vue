@@ -42,6 +42,7 @@
                   <td>{{ formatDate(upload.created_at) }}</td>
                   <td><button id="btnView" type="button" class="btn btn-secondary"
                       @click="openPdf(upload.id)">View</button>
+                    <button id="btnDownload" type="button" class="btn btn-secondary" @click="">Download</button>
                   </td>
                 </tr>
               </tbody>
@@ -49,7 +50,7 @@
           </div>
         </div>
         <div class="col-md-6">
-          <iframe id="pdfViewer" class="pdf-viewer" ref="pdfViewer" height="100%"></iframe>
+          <object id="pdfViewer" class="pdf-viewer" ref="pdfViewer" height="100%" type="application/pdf" data="" />
         </div>
       </div>
     </div>
@@ -92,7 +93,7 @@ export default {
           const fileContent = response.data.file.file_path;
           const pdfViewer = this.$refs.pdfViewer;
 
-          pdfViewer.src = fileContent;
+          pdfViewer.data = fileContent;
 
           axios.post('increment-view-count', {
             formFileId: fileId,
@@ -170,7 +171,7 @@ export default {
       }
     },
     fetchData() {
-      const formId = this.$route.query.formId;  
+      const formId = this.$route.query.formId;
       console.log(formId)
       axios.get(`retrieve-forms/${formId}`, {
         headers: {
@@ -264,7 +265,7 @@ export default {
 .btn-secondary {
   background-color: #007bff;
   border-style: none;
-  width: 100%;
+  width: 50%;
   height: 40px;
 }
 
